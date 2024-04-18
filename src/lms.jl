@@ -1,5 +1,7 @@
 module lms
+export greet
 
 greet() = print("Hello World!")
+end
 
-end # module lms
+lms.greet()  # This line calls the greet function from the module
