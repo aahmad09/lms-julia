@@ -222,7 +222,7 @@ main() do app::Application #have to overrride main to do gui stuff
     CBbutton = Button()
     set_child!(CBbutton, Label("Checkout Book"))
     push_front!(box, CBbutton)
-    set_child!(window,box)
+    #set_child!(window,box)
     connect_signal_clicked!(CBbutton) do self::Button
         hide!(box)
         users = ListView(ORIENTATION_VERTICAL, SELECTION_MODE_SINGLE)
@@ -298,7 +298,7 @@ main() do app::Application #have to overrride main to do gui stuff
         connect_signal_clicked!(Sbutton) do self::Button
             #println(get_text(title), get_text(author), get_text(isbn), get_value(numCopies))
             #add_book(db, get_text(title), get_text(author), get_text(isbn), get_value(numCopies))
-            return_book(db, trunc(Int,get_value(Entry)))
+            return_book(db, parse(Int,get_text(num)))
             hide!(addbox)
             set_is_visible!(box,true)
             set_child!(window, box)
@@ -427,7 +427,7 @@ main() do app::Application #have to overrride main to do gui stuff
     GRbutton = Button()
     set_child!(GRbutton, Label("Generate Report(s)"))
     push_front!(box, GRbutton)
-    set_child!(window,box)
+    #set_child!(window,box)
     connect_signal_clicked!(GRbutton) do self::Button
         hide!(box)
         note = Notebook()

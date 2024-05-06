@@ -162,16 +162,16 @@ function return_book(db::SQLite.DB, checkout_id::Int)
     end
 
     # Fetch current and total available copies
-    book_result = DBInterface.execute(db, "SELECT available_copies, total_copies FROM Books WHERE id = ?", (book_id,))
+    book_result = DBInterface.execute(db, "SELECT available_copies FROM Books WHERE id = ?", (book_id,))
     book_info = DataFrame(fetch(book_result))
 
-    if isempty(book_info) || book_info.available_copies[1] >= book_info.total_copies[1]
+    if isempty(book_info) #|| book_info.available_copies[1] >= book_info.total_copies[1]
         println("Book copies are already fully stocked or data is missing.")
         return
     end
 
     # Update the available copies if not already at max
-    SQLite.execute(db, "UPDATE Books SET available_copies = available_copies + 1 WHERE id = ? AND available_copies < total_copies", (book_id,))
+    SQLite.execute(db, "UPDATE Books SET available_copies = available_copies + 1 WHERE id = ?", (book_id,))
     SQLite.execute(db, "UPDATE Checkouts SET return_date = date('now') WHERE id = ?", (checkout_id,))
     println("Book returned successfully.")
 end
