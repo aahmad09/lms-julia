@@ -5,34 +5,44 @@ using SQLite, DataFrames, PrettyTables, SHA, Random
 function add_book(db::SQLite.DB, title::String, author::String, isbn::String, available_copies::Int)
     # When adding a book, both available and total copies should be set to the number of copies added.
     SQLite.execute(db, """
-        INSERT INTO Books (title, author, isbn, available_copies, total_copies) 
-        VALUES (?, ?, ?, ?, ?)
-    """, (title, author, isbn, available_copies, available_copies))
+        INSERT INTO Books (title, author, isbn, available_copies) 
+        VALUES (?, ?, ?, ?)
+    """, (title, author, isbn, available_copies))
     println("Book added successfully: $title")
 end
 
 
 function add_user(db::SQLite.DB, name::String, email::String, password::String, role::String="user")
     hashed_password = SHA.sha256(string(password, randstring(10)))  # Simple hashing with salt
-    SQLite.execute(db, "INSERT INTO Users (name, email, password, role) VALUES (?, ?, ?, ?)", (name, email, hashed_password, role))
+    SQLite.execute(db, "INSERT INTO Users (name, email) VALUES (?, ?)", (name, email))
 end
 
 function display_books(db::SQLite.DB)
     result = DBInterface.execute(db, "SELECT * FROM Books;")
     df = DataFrame(result)
-    pretty_table(df, title="Books List")
+    #return df
+    x = pretty_table(df, title="Books List")
+    return  df #x#pretty_table(df, title="Books List")
+end
+
+function return_display_books!(db::SQLite.DB)
+    result = DBInterface.execute(db, "SELECT * FROM Books;")
+    df = DataFrame(result)
+    return df
 end
 
 function display_users(db::SQLite.DB)
-    result = DBInterface.execute(db, "SELECT id, name, email, role FROM Users;")
+    result = DBInterface.execute(db, "SELECT * FROM Users;")
     df = DataFrame(result)
     pretty_table(df, title="Users List")
+    return df
 end
 
 function display_checkouts(db::SQLite.DB)
     result = DBInterface.execute(db, "SELECT * FROM Checkouts;")
     df = DataFrame(result)
     pretty_table(df, title="Checkouts List")
+    return df
 end
 
 function authenticate_user(db::SQLite.DB, email::String, password::String)
@@ -46,6 +56,8 @@ function search_books(db::SQLite.DB, criteria::Dict)
     df = DataFrame(result)
     pretty_table(df, title="Search Results")
 end
+
+
 
 function list_valid_columns(db::SQLite.DB, table_name::String)
     try
@@ -100,6 +112,7 @@ function generate_reports(db::SQLite.DB)
         """
     ) |> DataFrame
     pretty_table(user_activity, title="User Activity Report")
+    return (popular_books, late_books,user_activity)
 end
 
 function checkout_book(db::SQLite.DB, user_id::Int, book_id::Int)
@@ -168,6 +181,7 @@ function manage_reservations(db::SQLite.DB)
     # Assuming Reservations table and necessary fields are added to the database
     reservations = DBInterface.execute(db, "SELECT * FROM Reservations WHERE status = 'active';") |> DataFrame
     pretty_table(reservations, title="Active Reservations")
+    return reservations
 end
 
 function add_reservation(db::SQLite.DB, user_id::Int, book_id::Int)
